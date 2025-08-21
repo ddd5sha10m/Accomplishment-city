@@ -2,6 +2,7 @@
 
 from city import City
 from project import Project
+import datetime
 
 # 等級設定
 # key: 等級
@@ -72,12 +73,85 @@ def main():
             print(f"專案 '{project_name}' 規劃完畢！")
 
 
-        elif choice == '2': # 原本的 "新增任務" 改為 "編輯"
+        elif choice == '2': # 編輯專案任務
             if not projects:
                 print("目前沒有任何專案可供編輯。")
                 continue
-            # ... (此處邏輯與舊版的 choice '2' 相同，用於後續彈性調整，此處省略以保持簡潔)
-            print("功能開發中... (此處可加入新增/刪除/修改任務的邏輯)")
+            
+            print("\n--- 選擇要編輯的專案 ---")
+            for i, p in enumerate(projects):
+                print(f"{i+1}. {p.name}")
+            
+            try:
+                p_choice = int(input(f"請選擇專案編號 (1-{len(projects)}): ")) - 1
+                if not (0 <= p_choice < len(projects)):
+                    print("無效的選擇。")
+                    continue
+            except ValueError:
+                print("請輸入數字。")
+                continue
+
+            chosen_project = projects[p_choice]
+
+            # --- 進入該專案的「編輯工作台」迴圈 ---
+            while True:
+                print(f"\n--- 編輯專案: {chosen_project.name} ---")
+                if not chosen_project.tasks:
+                    print("此專案目前沒有任何積木。")
+                else:
+                    for i, task in enumerate(chosen_project.tasks):
+                        print(f"{i+1}. {task}")
+                
+                print("\n--- 編輯選項 ---")
+                print("1. 新增積木")
+                print("2. 修改積木描述")
+                print("3. 設定/修改積木期限")
+                print("4. 刪除積木")
+                print("b. 返回主選單")
+                
+                edit_choice = input("請選擇操作: ")
+
+                if edit_choice == '1': # 新增
+                    task_limit = LEVEL_CONFIG.get(my_city.architect_level, {}).get('max_tasks', float('inf'))
+                    if len(chosen_project.tasks) >= task_limit:
+                        print(f"無法新增，已達到等級 {my_city.architect_level} 的積木上限 ({task_limit}塊)。")
+                        continue
+                    
+                    desc = input("輸入新積木的描述: ")
+                    chosen_project.add_task(desc)
+
+                elif edit_choice == '2': # 修改描述
+                    try:
+                        t_idx = int(input("選擇要修改的積木編號: ")) - 1
+                        new_desc = input("輸入新的描述: ")
+                        chosen_project.tasks[t_idx].edit(new_description=new_desc)
+                    except (ValueError, IndexError):
+                        print("無效的選擇或輸入。")
+
+                elif edit_choice == '3': # 修改期限
+                    try:
+                        t_idx = int(input("選擇要設定期限的積木編號: ")) - 1
+                        date_str = input("輸入期限 (格式 YYYY-MM-DD)，或留空來清除期限: ")
+                        if not date_str:
+                             chosen_project.tasks[t_idx].edit(new_due_date=None)
+                        else:
+                            new_due_date = datetime.datetime.strptime(date_str, "%Y-%m-%d").date()
+                            chosen_project.tasks[t_idx].edit(new_due_date=new_due_date)
+                    except (ValueError, IndexError):
+                        print("無效的選擇或日期格式錯誤。")
+                
+                elif edit_choice == '4': # 刪除
+                    try:
+                        t_idx = int(input("選擇要刪除的積木編號: ")) - 1
+                        removed_task = chosen_project.tasks.pop(t_idx)
+                        print(f"積木 '{removed_task.description}' 已被刪除。")
+                    except (ValueError, IndexError):
+                        print("無效的選擇。")
+
+                elif edit_choice.lower() == 'b':
+                    break # 跳出編輯迴圈
+                else:
+                    print("無效的選項。")
 
         elif choice == '3':
             if not projects:
