@@ -1,6 +1,7 @@
 # project.py
 
 # 我們需要從 task.py 檔案中導入 Task 類別
+'''
 from task import Task
 import datetime
 class Project:
@@ -60,4 +61,39 @@ class Project:
         # 將每個任務的字串表示串接起來
         tasks_str = "\n".join(str(task) for task in self.tasks)
         
+        return header + tasks_str
+'''
+from task import Task
+import datetime
+
+class Project:
+    def __init__(self, name: str, category: str): # --- 修改：增加 category 參數 ---
+        self.name = name
+        self.category = category # --- 新增：儲存分類
+        self.tasks = []
+        self.last_updated_date = datetime.date.today()
+
+    def add_task(self, description: str, due_date: datetime.date = None):
+        new_task = Task(description, due_date)
+        self.tasks.append(new_task)
+        # --- 修改：讓提示訊息更豐富 ---
+        print(f"專案 '{self.name}' ({self.category}) -> 已新增積木: '{description}'")
+
+    def touch(self):
+        self.last_updated_date = datetime.date.today()
+
+    def is_complete(self) -> bool:
+        if not self.tasks:
+            return False
+        for task in self.tasks:
+            if task.status == 'pending':
+                return False
+        return True
+
+    def __str__(self) -> str:
+        total_tasks = len(self.tasks)
+        completed_tasks = sum(1 for task in self.tasks if task.status == 'completed')
+        # --- 修改：顯示專案分類 ---
+        header = f"--- 專案: {self.name} [{self.category}] (進度: {completed_tasks}/{total_tasks}) ---\n"
+        tasks_str = "\n".join(str(task) for task in self.tasks)
         return header + tasks_str
