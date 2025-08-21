@@ -34,11 +34,17 @@ class Building:
 # building.py
 
 class Building:
-    def __init__(self, project_name: str, category: str, vitality_points: int): # --- 修改：增加參數 ---
+    # --- 修改：增加 size 和 coordinates 屬性 ---
+    def __init__(self, project_name: str, category: str, vitality_points: int, size: tuple):
         self.name = project_name
-        self.category = category # --- 新增：建築分類
-        self.vitality_points = vitality_points # --- 新增：活力點數
-        self.completion_date = datetime.date.today()
+        self.category = category
+        self.vitality_points = vitality_points
+        self.size = size  # --- 新增：尺寸，例如 (寬, 高) -> (2, 2)
+        self.coordinates = None  # --- 新增：位置，初始為 None
+
+    # --- 新增：設定建築位置的方法 ---
+    def set_position(self, x: int, y: int):
+        self.coordinates = (x, y)
 
     def rename(self, new_name: str):
         self.name = new_name
@@ -46,7 +52,9 @@ class Building:
 
     def __str__(self) -> str:
         # --- 修改：顯示更豐富的資訊 ---
-        return f"建築物: {self.name} [{self.category}] (貢獻活力: +{self.vitality_points} | 建成於: {self.completion_date})"
+        pos_str = f" @ ({self.coordinates[0]},{self.coordinates[1]})" if self.coordinates else ""
+        size_str = f"({self.size[0]}x{self.size[1]})"
+        return f"建築物: {self.name} {size_str} [{self.category}]{pos_str}"
 
 # --- 新增：一個專門給獎勵的地標類別 ---
 class Landmark:
