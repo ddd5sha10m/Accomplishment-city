@@ -2,7 +2,7 @@
 
 # 我們需要從 task.py 檔案中導入 Task 類別
 from task import Task
-
+import datetime
 class Project:
     """
     代表一個專案或一個大目標，由多個小任務 (積木) 組成。
@@ -12,23 +12,18 @@ class Project:
         tasks (list[Task]): 組成此專案的任務清單。
     """
     def __init__(self, name: str):
-        """
-        初始化一個新的 Project 物件。
-
-        參數:
-            name (str): 專案的名稱。
-        """
         self.name = name
-        self.tasks = []  # 初始時，任務清單是空的
+        self.tasks = []
 
-    def add_task(self, description: str):
+    def add_task(self, description: str, due_date: datetime.date = None):
         """
         為這個專案新增一個任務 (積木)。
 
         參數:
             description (str): 任務的描述。
+            due_date (date, optional): 任務的期限. Defaults to None.
         """
-        new_task = Task(description)
+        new_task = Task(description, due_date) # 將 due_date 傳遞給 Task
         self.tasks.append(new_task)
         print(f"專案 '{self.name}' -> 已新增積木: '{description}'")
 
