@@ -67,18 +67,23 @@ from task import Task
 import datetime
 
 class Project:
-    def __init__(self, name: str, category: str): # --- 修改：增加 category 參數 ---
+    def __init__(self, name: str, category: str, size: tuple):
         self.name = name
-        self.category = category # --- 新增：儲存分類
+        self.category = category
         self.tasks = []
         self.last_updated_date = datetime.date.today()
+        self.size = size # --- 新增：專案佔地尺寸
+        self.coordinates = None # --- 新增：專案在地圖上的位置
+
+    # --- 新增：設定專案位置的方法 ---
+    def set_position(self, x: int, y: int):
+        self.coordinates = (x, y)
 
     def add_task(self, description: str, due_date: datetime.date = None):
         new_task = Task(description, due_date)
         self.tasks.append(new_task)
-        # --- 修改：讓提示訊息更豐富 ---
         print(f"專案 '{self.name}' ({self.category}) -> 已新增積木: '{description}'")
-
+        
     def touch(self):
         self.last_updated_date = datetime.date.today()
 

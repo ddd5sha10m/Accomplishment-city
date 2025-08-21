@@ -4,9 +4,7 @@ class CityMap:
     def __init__(self, width: int, height: int):
         self.width = width
         self.height = height
-        # 創建一個二維列表作為網格，'.' 代表空地
         self.grid = [['.' for _ in range(width)] for _ in range(height)]
-        # 用來存放已放置的建築物物件
         self.placed_buildings = []
 
     def display(self):
@@ -30,24 +28,40 @@ class CityMap:
                     return True
         return False
 
-    def place_building(self, building, x, y) -> bool:
-        """嘗試將建築放置在地圖上"""
-        width, height = building.size
+    def place_construction_site(self, project, x, y) -> bool:
+        """嘗試在地圖上規劃一片施工地"""
+        width, height = project.size
         
         if not self._is_within_bounds(x, y, width, height):
-            print("錯誤：建築超出地圖邊界！")
+            print("錯誤：規劃地點超出地圖邊界！")
             return False
         
         if self._is_overlapping(x, y, width, height):
-            print("錯誤：此處已被其他建築佔用！")
+            print("錯誤：此處已有其他規劃！")
             return False
 
-        # 放置建築
-        building_char = building.category[0].upper() # 用分類的第一個字母當作圖標
+        # 放置施工鷹架，我們用 '#' 作為標記
+        for i in range(height):
+            for j in range(width):
+                self.grid[y + i][x + j] = '#'
+        
+        project.set_position(x, y)
+        print(f"'{project.name}' 的工地已成功規劃在 ({x},{y})！")
+        return True
+
+    # --- 新增：將工地正式變為建築的方法 ---
+    def finalize_building(self, building):
+        """專案完工，將鷹架替換為建築"""
+        if not building.coordinates:
+            print("錯誤：此建築沒有座標，無法完工。")
+            return
+            
+        x, y = building.coordinates
+        width, height = building.size
+        building_char = building.category[0].upper()
+
         for i in range(height):
             for j in range(width):
                 self.grid[y + i][x + j] = building_char
         
-        building.set_position(x, y)
         self.placed_buildings.append(building)
-        return True
