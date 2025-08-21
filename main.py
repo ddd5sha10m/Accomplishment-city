@@ -7,11 +7,11 @@ import datetime
 # 等級設定
 # key: 等級
 # value: (該等級積木上限, 升到下一級所需的建築總數)
+# 等級設定
 LEVEL_CONFIG = {
-    1: {'max_tasks': 5, 'buildings_to_level_up': 3},
-    2: {'max_tasks': 8, 'buildings_to_level_up': 7},
-    3: {'max_tasks': 12, 'buildings_to_level_up': 12},
-    # 可以繼續往上加
+    1: {'max_tasks': 5, 'buildings_to_level_up': 3, 'wip_limit': 2},
+    2: {'max_tasks': 8, 'buildings_to_level_up': 7, 'wip_limit': 3},
+    3: {'max_tasks': 12, 'buildings_to_level_up': 12, 'wip_limit': 4},
 }
 
 def check_for_level_up(city: City):
@@ -39,8 +39,11 @@ def main():
     projects = []
 
     while True:
+        # --- 修改：在主選單顯示目前專案數量與上限 ---
+        current_wip_limit = LEVEL_CONFIG.get(my_city.architect_level, {}).get('wip_limit', 2)
         current_max_tasks = LEVEL_CONFIG.get(my_city.architect_level, {}).get('max_tasks', '無限制')
-        print(f"\n=== 建築師工作台 (等級: {my_city.architect_level} | 積木上限: {current_max_tasks}) ===")
+        
+        print(f"\n=== 建築師工作台 (等級: {my_city.architect_level} | 專案: {len(projects)}/{current_wip_limit} | 積木上限: {current_max_tasks}) ===")
         print("1. 建立新專案與任務 (開始規劃新建築)")
         print("2. 編輯專案任務 (調整積木)")
         print("3. 完成任務 (開始堆砌積木)")
@@ -51,6 +54,10 @@ def main():
         choice = input("請選擇你的下一步行動 (1-6): ")
 
         if choice == '1':
+            if len(projects) >= current_wip_limit:
+                print("\n** 你的工作台已經滿了！ **")
+                print("專注是通往偉大成就的捷徑。請先完成一項進行中的專案，來為新的靈感騰出空間。")
+                continue # 中斷此次操作，返回主選單
             project_name = input("請輸入新專案的名稱: ")
             new_project = Project(project_name)
             
@@ -199,6 +206,7 @@ def main():
                     if 0 <= t_choice < len(pending_tasks):
                         task_to_complete = pending_tasks[t_choice]
                         task_to_complete.complete()
+                        chosen_project.touch()
 
                         # ** 核心檢查機制 **
                         # 檢查整個專案是否因為這次的任務完成而全部完成
@@ -212,12 +220,23 @@ def main():
                 except ValueError:
                     print("請輸入數字或 'b'。")
 
-        elif choice == '4':
+        elif choice == '4': # 查看所有專案進度
             if not projects:
                 print("目前沒有任何進行中的專案。")
             else:
+                print("\n--- 所有專案進度 ---")
+                today = datetime.date.today()
                 for project in projects:
-                    print(project)
+                    # --- 新增：計算營火狀態 ---
+                    days_idle = (today - project.last_updated_date).days
+                    if days_idle < 3:
+                        campfire_emoji = "🔥"
+                    elif 3 <= days_idle <= 7:
+                        campfire_emoji = "...🔥"
+                    else:
+                        campfire_emoji = "🧊"
+                    
+                    print(f"{campfire_emoji} {project}")
 
         elif choice == '5':
             my_city.display()

@@ -14,6 +14,7 @@ class Project:
     def __init__(self, name: str):
         self.name = name
         self.tasks = []
+        self.last_updated_date = datetime.date.today()
 
     def add_task(self, description: str, due_date: datetime.date = None):
         """
@@ -23,9 +24,13 @@ class Project:
             description (str): 任務的描述。
             due_date (date, optional): 任務的期限. Defaults to None.
         """
-        new_task = Task(description, due_date) # 將 due_date 傳遞給 Task
+        new_task = Task(description, due_date)
         self.tasks.append(new_task)
         print(f"專案 '{self.name}' -> 已新增積木: '{description}'")
+
+    def touch(self):
+        """更新專案的最後活動日期"""
+        self.last_updated_date = datetime.date.today()
 
     def is_complete(self) -> bool:
         """
